@@ -1,5 +1,5 @@
 import random
-import movie_storage
+import movie_storage_sql as storage
 
 MAX_RATING = 10.0
 MIN_RATING = 1.0
@@ -9,9 +9,8 @@ LOW_COMMAND_NUMBER = 0
 HIGH_COMMAND_NUMBER = 10
 
 def print_menu():
-    """
-    Main menu printed all option for the user
-    """
+    """Main menu printed all option for the user"""
+
     print("\nWelcome to my movies database")
     print("\nMenu:"
           "\n 0. Exit"
@@ -27,9 +26,8 @@ def print_menu():
           "\n 10. Filter movies")
 
 def get_menu_choice():
-    '''
-    Gets and validates the user's menu choice.
-    '''
+    """ Gets and validates the user's menu choice. """
+
     while True:
         try:
             user_input = int(input("\nEnter Choice (0-10): "))
@@ -41,53 +39,45 @@ def get_menu_choice():
             print('\nUnknown command, please enter a number between 0 and 10.')
 
 def end_of_program():
+    """ Exits the movie Database """
+
     print('Bye!')
     raise SystemExit
 
 def quit_function():
-    """
-    Function for quit a function
-    """
+    """ quit a function """
 
     input("\nPress enter to continue")
 
 
 def list_movies():
-    """
-    This function prints all the movies in the database
-    """
-    all_movies = movie_storage.get_movies()
+    """Retrieve and display all movies from the database"""
+
+    all_movies = storage.list_movies()
 
     print(f"\nThe total of movies is {len(all_movies)}\n")
-    for movie in all_movies:
+    for movie in all_movies: #### Hier müsste nochmal nachgeschaut werden ob es so #######
         print(f"{movie}: {all_movies[movie]['rating']} ({all_movies[movie]['year']})")
 
     quit_function()
 
 def add_movie():
-    """
-    Function for add a new movie insert the list of movies.
-    """
+    """ Function for add a new movie insert the list of movies """
     movie_founder = False
-    all_movies = movie_storage.get_movies()
 
-    while True:
-        user_input_add_movie = input("\nEnter movie name: ").strip()
-        if not user_input_add_movie:
-            print('Movie title cannot be empty.')
-            continue
+    if len(storage.list_movies()) == 0:
+        while True:
+            userinput_movie_title = input("\nEnter movie title: ").strip()
+            if not userinput_movie_title:
+                print('Movie title cannot be empty.')
+                continue
 
-        break
+            break
 
-    for movie in all_movies:
-        if user_input_add_movie.lower() == movie.lower():         # user_input.lower() here because otherwise .lower() would convert the entire entry in the database to lower case. For example: Transformers Part II == Transformers part ii
-             movie_founder = True
-
-    if not movie_founder:
         while True:
             try:
-                user_input_add_rating = float(input("Enter movie rating: "))
-                if user_input_add_rating <= MAX_RATING and user_input_add_rating >= MIN_RATING:
+                userinput_movie_rating = float(input("Enter movie rating: "))
+                if MAX_RATING >= userinput_movie_rating >= MIN_RATING:
                     break
                 else:
                     print('Select a rating between 1.0 and 10.0')
@@ -97,9 +87,52 @@ def add_movie():
 
         while True:
             try:
-                user_input_add_year = input('Enter the year of publication: ')
-                if len(user_input_add_year) == MIN_AND_MAX_INDEX_FOR_A_CORRECT_YEAR and int(user_input_add_year) >= YEAR_OF_FIRST_MOVIE:
-                    movie_storage.add_movie(user_input_add_movie, user_input_add_rating, int(user_input_add_year))
+                userinput_year_of_movie_publication = input('Enter the year of publication: ')
+                if len(userinput_year_of_movie_publication) == MIN_AND_MAX_INDEX_FOR_A_CORRECT_YEAR and int(userinput_year_of_movie_publication) >= YEAR_OF_FIRST_MOVIE:
+
+                    storage.add_movie(userinput_movie_title, userinput_movie_rating, int(userinput_year_of_movie_publication))
+                    print("\nMovie added to database")
+                    break
+                else:
+                    print('Invalid year! Try again')
+            except ValueError:
+                print('The year must be a number')
+
+        storage.add_movie(userinput_movie_title, userinput_movie_rating, userinput_year_of_movie_publication)
+        return
+
+    all_movies = storage.list_movies()
+
+    while True:
+        userinput_movie_title = input("\nEnter movie title: ").strip()
+        if not userinput_movie_title:
+            print('Movie title cannot be empty.')
+            continue
+
+        break
+
+    for movie in all_movies:
+        if userinput_movie_title.lower() == movie.lower():         # user_input.lower() here because otherwise .lower() would convert the entire entry in the database to lower case. For example: Transformers Part II == Transformers part ii
+             movie_founder = True
+
+    if not movie_founder:
+        while True:
+            try:
+                userinput_movie_rating = float(input("Enter movie rating: "))
+                if MAX_RATING >= userinput_movie_rating >= MIN_RATING:
+                    break
+                else:
+                    print('Select a rating between 1.0 and 10.0')
+
+            except ValueError:
+                print('The rating most be a number')
+
+        while True:
+            try:
+                userinput_year_of_movie_publication = input('Enter the year of publication: ')
+                if len(userinput_year_of_movie_publication) == MIN_AND_MAX_INDEX_FOR_A_CORRECT_YEAR and int(userinput_year_of_movie_publication) >= YEAR_OF_FIRST_MOVIE:
+
+                    storage.add_movie(userinput_movie_title, userinput_movie_rating, int(userinput_year_of_movie_publication))
                     print("\nMovie added to database")
                     break
                 else:
@@ -116,18 +149,18 @@ def delete_movie():
     """
     Function for delete a movie returned the new dictionary of movie
     """
-    all_movies = movie_storage.get_movies()
-    user_input_delete_movie = input("\nWhich Movie do you want to delete?: ").lower().strip()
+    all_movies = storage.list_movies()
+    userinput_movie_title = input("\nWhich Movie do you want to delete?: ").lower().strip()
 
     movie_founder = False
     movie_key_founder = ''
     for movie in all_movies:
-        if user_input_delete_movie == movie.lower():
+        if userinput_movie_title == movie.lower():
             movie_founder = True
             movie_key_founder = movie
 
     if movie_founder:
-        movie_storage.delete_movie(movie_key_founder)
+        storage.delete_movie(movie_key_founder)
         print("\nThe Movie is now deleted")
     else:
         print("\nMovie not found")
@@ -138,22 +171,22 @@ def update_movie():
     """
     Function for update rating of a movie.
     """
-    all_movies = movie_storage.get_movies()
-    user_input_movie = input("\nWhich Movie do you want to update?: ").lower().strip()
+    all_movies = storage.list_movies()
+    userinput_movie_title = input("\nWhich Movie do you want to update?: ").lower().strip()
 
     movie_founder = False
     movie_key_founder = ''
     for movie in all_movies:
-        if user_input_movie == movie.lower():
+        if userinput_movie_title == movie.lower():
             movie_founder = True
             movie_key_founder = movie
 
     if movie_founder:
         while True:
             try:
-                user_input_rating = float(input("Enter the new rating: "))
-                if user_input_rating <= MAX_RATING and user_input_rating >= MIN_RATING:
-                    movie_storage.update_movie(movie_key_founder, user_input_rating)
+                userinput_movie_rating = float(input("Enter the new rating: "))
+                if userinput_movie_rating <= MAX_RATING and userinput_movie_rating >= MIN_RATING:
+                    storage.update_movie(movie_key_founder, userinput_movie_rating)
                     print('Movie is now updated')
                     break
                 else:
@@ -170,7 +203,7 @@ def stats():
     """
     Function of stats average rating, median, hightest and worst movie by rating.
     """
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
     list_of_rating = []
     for movie in all_movies:
         list_of_rating.append(all_movies[movie]["rating"])
@@ -201,7 +234,7 @@ def random_movie():
     """
     Function for random movie
     """
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
     choice_movie = random.choice(list(all_movies))
     print(f"Your movie for to night, {choice_movie} rated by {all_movies[choice_movie]['rating']}")
     quit_function()
@@ -213,7 +246,7 @@ def search_movie():
     """
     user_input_search_movie = input("Which movie are you searching for?: ").lower().strip()
     movie_founder = False
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
     for movie in all_movies:
         if user_input_search_movie in movie.lower():
             print(f"{movie} : {all_movies[movie]['rating']}")
@@ -227,7 +260,7 @@ def movies_sorted_by_rating():
     """
     Function movie sorted by rating
     """
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
     list_of_movie_tuple = []
     for movie in all_movies:
         list_of_movie_tuple.append((all_movies[movie]["rating"], movie))
@@ -241,7 +274,7 @@ def movies_sorted_by_year():
     """
     Function movie sorted by year
     """
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
     list_of_movie_tuple = []
     for movie in all_movies:
         list_of_movie_tuple.append((all_movies[movie]["year"], movie))
@@ -279,7 +312,7 @@ def filter_movies():
     all movies matching the selected filters. If no movies match the
     criteria, a message is displayed.
     '''
-    all_movies = movie_storage.get_movies()
+    all_movies = storage.list_movies()
 
     prompts = [
                 (
