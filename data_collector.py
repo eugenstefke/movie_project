@@ -4,21 +4,26 @@ from dotenv import load_dotenv # to load the .env file
 
 def retrieve_data(title):
     """Retrieve the movie data."""
+    try:
+        load_dotenv()
+        api_key = os.getenv("API_KEY")
 
+        URL = "http://www.omdbapi.com/"
+        PARAMETERS = {
+                    "t" : title,
+                    "apikey" : api_key
+                    }
 
-    load_dotenv()
-    api_key = os.getenv("API_KEY")
+        get_requ = requests.get(URL, params=PARAMETERS)
 
-    URL = "http://www.omdbapi.com/?"
-    PARAMETERS = {"t" : title}
-    HEADERS = {"apikey" : api_key}
+        if get_requ == None:
+            return []
 
-    get_requ = requests.get(URL, params=PARAMETERS, headers=HEADERS)
-
-    if get_requ.status_code == 200:
-        movie_infos = get_requ.json()
-        write_data(movie_infos)
-        return animal_infos
-    else:
-        print(f"Data Error: Status {get_requ.status_code}")
-        return []
+        if get_requ.status_code == 200:
+            movie_infos = get_requ.json()
+            return movie_infos
+        else:
+            print(f"Data Error: Status {get_requ.status_code}")
+            return []
+    except Exception:
+        print("Error, no conection to the internet")
