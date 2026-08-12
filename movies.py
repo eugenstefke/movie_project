@@ -1,6 +1,7 @@
 import random
 import movie_storage_sql as storage
 from data_collector import retrieve_data
+import text_generator as generator
 
 MAX_RATING = 10.0
 MIN_RATING = 1.0
@@ -37,21 +38,21 @@ def print_menu():
           "\n 6. Random movie"
           "\n 7. Search movie"
           "\n 8. Movies sorted by rating"
-          "\n 9. Movies sorted by year"
-          "\n 10. Filter movies")
+          "\n 9. Generate your movie website"
+          ) # "\n 9. Movies sorted by year" "\n 10. Filter movies"
 
 def get_menu_choice():
     """Gets and validates the user's menu choice"""
 
     while True:
         try:
-            user_input = int(input("\nEnter Choice (0-10): "))
+            user_input = int(input("\nEnter Choice (0-9): "))
             if LOW_COMMAND_NUMBER <= user_input <= HIGH_COMMAND_NUMBER:
                 return user_input
             else:
-                print('\nUnknown command, please enter a number between 0 and 10')
+                print('\nUnknown command, please enter a number between 0 and 9')
         except ValueError:
-            print('\nUnknown command, please enter a number between 0 and 10.')
+            print('\nUnknown command, please enter a number between 0 and 9')
 
 def end_of_program():
     """Exits the movie Database"""
@@ -71,7 +72,7 @@ def list_movies():
     all_movies = storage.list_movies()
 
     print(f"\nThe total of movies is {len(all_movies)}\n")
-    for movie in all_movies: #### Hier müsste nochmal nachgeschaut werden ob es so #######
+    for movie in all_movies:
         print(f"Title: {movie} Rating: {all_movies[movie]['rating']}, Year of publication: {all_movies[movie]['year']}")
 
     quit_function()
@@ -244,110 +245,133 @@ def movies_sorted_by_rating():
         list_of_movie_tuple.append((all_movies[movie]["rating"], movie))
 
     for movie_tuple in sorted(list_of_movie_tuple, reverse=True):
-            print(movie_tuple[1] , movie_tuple[0])
+            print(f"{movie_tuple[1]}: {movie_tuple[0]}")
 
     quit_function()
 
-def movies_sorted_by_year():
-    """Function movie sorted by year"""
+# def movies_sorted_by_year():
+#     """Function movie sorted by year"""
+#
+#     if len(storage.list_movies()) == 0:
+#         print("No movies found to sort.")
+#         quit_function()
+#         return
+#
+#     all_movies = storage.list_movies()
+#     list_of_movie_tuple = []
+#     for movie in all_movies:
+#         year = all_movies[movie]["year"]
+#         sort_year = get_sort_year(year)
+#         list_of_movie_tuple.append((sort_year, movie))
+#     user_input = input('Do you want the latest movies first? (Y/N) ').lower().strip()
+#
+#     while True:
+#
+#         if user_input == 'y':
+#             print('')
+#             for movie_tuple in sorted(list_of_movie_tuple, reverse=True):
+#                 print(movie_tuple[0], movie_tuple[1])
+#             break
+#
+#         elif user_input == 'n':
+#             print('')
+#             for movie_tuple in sorted(list_of_movie_tuple):
+#                 print(movie_tuple[0], movie_tuple[1])
+#             break
+#
+#         else:
+#             print('please only "Y" or "N"')
+#             user_input = input('Do you want the latest movies first? (Y/N) ').lower().strip()
+#
+#     quit_function()
+#
+# def filter_movies():
+#     """
+#     Filters movies based on user-defined criteria.
+#
+#     The user can enter a minimum rating, a start year, and an end year.
+#     Empty inputs are treated as no filter for the corresponding criteria.
+#
+#     The function checks all movies from the movie storage and prints
+#     all movies matching the selected filters. If no movies match the
+#     criteria, a message is displayed.
+#     """
+#     all_movies = storage.list_movies()
+#
+#     prompts = [
+#                 (
+#                     "Enter minimum rating (leave blank for no minimum rating): ",
+#                     float,
+#                     "Invalid input. Please enter a valid rating."
+#                 ),
+#                 (
+#                     "Enter start year (leave blank for no start year): ",
+#                     int,
+#                     "Invalid input. Please enter a valid start year."
+#                 ),
+#                 (
+#                     "Enter end year (leave blank for no end year): ",
+#                     int,
+#                     "Invalid input. Please enter a valid end year."
+#                 )
+#                 ]
+#
+#     values = []
+#
+#     for prompt, data_type, error_message in prompts:
+#         while True:
+#             user_input = input(prompt)
+#
+#             if user_input == "":
+#                 values.append(None)
+#                 break
+#
+#             try:
+#                 values.append(data_type(user_input))
+#                 break
+#             except ValueError:
+#                 print(error_message)
+#
+#     min_rating, start_year, end_year = values
+#
+#     filter_movie = []
+#
+#     for movie in all_movies:
+#         sort_year = get_sort_year(all_movies[movie]["year"])
+#         if min_rating is None or min_rating <= all_movies[movie]["rating"]:
+#             if start_year is None or start_year <= sort_year:
+#                 if end_year is None or end_year >= sort_year:
+#                     filter_movie.append((movie, sort_year, all_movies[movie]['rating']))
+#
+#     if filter_movie:
+#         for movie in filter_movie:
+#             print(f'{movie[0]} ({movie[1]}): {movie[2]}')
+#     else:
+#         print('No movie found')
+#
+#     quit_function()
 
-    if len(storage.list_movies()) == 0:
-        print("No movies found to sort.")
-        quit_function()
-        return
-
+def generate_website():
+    """Generate a movie Website for the User"""
     all_movies = storage.list_movies()
-    list_of_movie_tuple = []
-    for movie in all_movies:
-        year = all_movies[movie]["year"]
-        sort_year = get_sort_year(year)
-        list_of_movie_tuple.append((sort_year, movie))
-    user_input = input('Do you want the latest movies first? (Y/N) ').lower().strip()
 
-    while True:
+    all_movies_info = ""
+    for title, info in all_movies.items():
+        movie_info = ""
+        movie_info += "<li>\n"
+        movie_info += '<div class="movie">\n'
+        movie_info += f'<img class="movie-poster" src="{info["cover_url"]}" title=""/>\n'
+        movie_info += f'<div class="movie-title">{title}</div>\n'
+        movie_info += f'<div class="movie-year">{info["year"]}</div>\n'
+        movie_info += '</div>\n'
+        movie_info += '</li>'
+        movie_info += '\n'
+        all_movies_info += movie_info
 
-        if user_input == 'y':
-            print('')
-            for movie_tuple in sorted(list_of_movie_tuple, reverse=True):
-                print(movie_tuple[0], movie_tuple[1])
-            break
+    new_html_code = generator.replace_text(generator.read_html_data(), all_movies_info)
+    generator.write_a_html_code(new_html_code)
 
-        elif user_input == 'n':
-            print('')
-            for movie_tuple in sorted(list_of_movie_tuple):
-                print(movie_tuple[0], movie_tuple[1])
-            break
-
-        else:
-            print('please only "Y" or "N"')
-            user_input = input('Do you want the latest movies first? (Y/N) ').lower().strip()
-
-    quit_function()
-
-def filter_movies():
-    """
-    Filters movies based on user-defined criteria.
-
-    The user can enter a minimum rating, a start year, and an end year.
-    Empty inputs are treated as no filter for the corresponding criteria.
-
-    The function checks all movies from the movie storage and prints
-    all movies matching the selected filters. If no movies match the
-    criteria, a message is displayed.
-    """
-    all_movies = storage.list_movies()
-
-    prompts = [
-                (
-                    "Enter minimum rating (leave blank for no minimum rating): ",
-                    float,
-                    "Invalid input. Please enter a valid rating."
-                ),
-                (
-                    "Enter start year (leave blank for no start year): ",
-                    int,
-                    "Invalid input. Please enter a valid start year."
-                ),
-                (
-                    "Enter end year (leave blank for no end year): ",
-                    int,
-                    "Invalid input. Please enter a valid end year."
-                )
-                ]
-
-    values = []
-
-    for prompt, data_type, error_message in prompts:
-        while True:
-            user_input = input(prompt)
-
-            if user_input == "":
-                values.append(None)
-                break
-
-            try:
-                values.append(data_type(user_input))
-                break
-            except ValueError:
-                print(error_message)
-
-    min_rating, start_year, end_year = values
-
-    filter_movie = []
-
-    for movie in all_movies:
-        sort_year = get_sort_year(all_movies[movie]["year"])
-        if min_rating is None or min_rating <= all_movies[movie]["rating"]:
-            if start_year is None or start_year <= sort_year:
-                if end_year is None or end_year >= sort_year:
-                    filter_movie.append((movie, sort_year, all_movies[movie]['rating']))
-
-    if filter_movie:
-        for movie in filter_movie:
-            print(f'{movie[0]} ({movie[1]}): {movie[2]}')
-    else:
-        print('No movie found')
-
+    print("Website was generated successfully.")
     quit_function()
 
 def main():
@@ -361,9 +385,8 @@ def main():
                          6: random_movie,
                          7: search_movie,
                          8: movies_sorted_by_rating,
-                         9: movies_sorted_by_year,
-                         10: filter_movies
-                         }
+                         9: generate_website
+                         }                                  # 9: movies_sorted_by_year, 10: filter_movies
 
     while True:
         print_menu()

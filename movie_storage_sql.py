@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, text
 DB_URL = "sqlite:///movies.db"
 
 # Create the engine
-engine = create_engine(DB_URL, echo=True)
+engine = create_engine(DB_URL, echo=False) # echo=True for debbuging print all SQL Commands
 
 # Create the movies table if it does not exist
 with engine.connect() as connection:
@@ -14,10 +14,11 @@ with engine.connect() as connection:
 def list_movies():
     """Retrieve all movies from the database."""
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT title, year, rating FROM movies"))
+        result = connection.execute(text("SELECT title, year, rating, cover_url FROM movies"))
         movies = result.fetchall()
 
-    return {row[0]: {"year": row[1], "rating": row[2]} for row in movies}
+
+    return {row[0]: {"year": row[1], "rating": row[2], "cover_url": row[3]} for row in movies}
 
 def add_movie(title, year, rating, cover_url):
     """Add a new movie to the database."""

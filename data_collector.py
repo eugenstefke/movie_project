@@ -26,4 +26,4 @@ def retrieve_data(title):
             print(f"Data Error: Status {get_requ.status_code}")
             return []
     except Exception:
-        print("Error, no conection to the internet")
+        print("Error, no connection to the internet")
