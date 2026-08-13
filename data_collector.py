@@ -16,9 +16,6 @@ def retrieve_data(title):
 
         get_requ = requests.get(URL, params=PARAMETERS)
 
-        if get_requ == None:
-            return []
-
         if get_requ.status_code == 200:
             movie_infos = get_requ.json()
             return movie_infos

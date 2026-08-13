@@ -2,6 +2,9 @@ import random
 import movie_storage_sql as storage
 from data_collector import retrieve_data
 import text_generator as generator
+from functools import partial
+import user_log
+
 
 MAX_RATING = 10.0
 MIN_RATING = 1.0
@@ -11,23 +14,23 @@ LOW_COMMAND_NUMBER = 0
 HIGH_COMMAND_NUMBER = 10
 
 
-def get_sort_year(year):
-    """Any movies are a series and have a period as publication year example: 2010–2020
-    and that’s what it is – not just a normal hyphen –
-    This Function replace the – to normal hyphen and split the period.
-    Return the first publication year"""
+# def get_sort_year(year):
+#     """Any movies are a series and have a period as publication year example: 2010–2020
+#     and that’s what it is – not just a normal hyphen –
+#     This Function replace the – to normal hyphen and split the period.
+#     Return the first publication year"""
+#
+#     if isinstance(year, str):
+#         year = year.replace("–", "-").strip()
+#         if "-" in year:
+#             first_year = year.split("-")[0].strip()
+#             return int(first_year)
+#     return int(year)
 
-    if isinstance(year, str):
-        year = year.replace("–", "-").strip()
-        if "-" in year:
-            first_year = year.split("-")[0].strip()
-            return int(first_year)
-    return int(year)
-
-def print_menu():
+def print_menu(name):
     """Main menu printed all option for the user"""
 
-    print("\nWelcome to my movies database")
+    print(f"\nWelcome back, {name}!")
     print("\nMenu:"
           "\n 0. Exit"
           "\n 1. List movies"
@@ -39,6 +42,7 @@ def print_menu():
           "\n 7. Search movie"
           "\n 8. Movies sorted by rating"
           "\n 9. Generate your movie website"
+          "\n 10. User change"
           ) # "\n 9. Movies sorted by year" "\n 10. Filter movies"
 
 def get_menu_choice():
@@ -46,7 +50,7 @@ def get_menu_choice():
 
     while True:
         try:
-            user_input = int(input("\nEnter Choice (0-9): "))
+            user_input = int(input("\nEnter Choice (0-10): "))
             if LOW_COMMAND_NUMBER <= user_input <= HIGH_COMMAND_NUMBER:
                 return user_input
             else:
@@ -54,10 +58,10 @@ def get_menu_choice():
         except ValueError:
             print('\nUnknown command, please enter a number between 0 and 9')
 
-def end_of_program():
+def end_of_program(user_name):
     """Exits the movie Database"""
 
-    print('Bye!')
+    print(f"Bye, {user_name}!")
     raise SystemExit
 
 def quit_function():
@@ -66,21 +70,23 @@ def quit_function():
     input("\nPress enter to continue")
 
 
-def list_movies():
+def list_movies(user_id, user_name):
     """Retrieve and display all movies from the database"""
 
-    all_movies = storage.list_movies()
-
-    print(f"\nThe total of movies is {len(all_movies)}\n")
-    for movie in all_movies:
-        print(f"Title: {movie} Rating: {all_movies[movie]['rating']}, Year of publication: {all_movies[movie]['year']}")
+    all_movies = storage.list_movies(user_id)
+    if len(all_movies) != 0:
+        print(f"\nThe total of movies is {len(all_movies)}\n")
+        for movie in all_movies:
+            print(f"Title: {movie} Rating: {all_movies[movie]['rating']}, Year of publication: {all_movies[movie]['year']}")
+    else:
+        print(f"{user_name}, your movie collection is empty. Add some movies!")
 
     quit_function()
 
-def add_movie():
+def add_movie(user_id, user_name):
     """Function for add a new movie insert the table of movies"""
 
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
 
     while True:
         userinput_movie_title = input("\nEnter movie title: ").strip()
@@ -92,28 +98,29 @@ def add_movie():
     if not any(userinput_movie_title.lower() == key.lower() for key in all_movies):        # user_input.lower() here because otherwise .lower() would convert the entire entry in the database to lower case. For example: Transformers Part II == Transformers part ii
         movie_info = retrieve_data(userinput_movie_title)
 
-        if movie_info == None:
-            quit_function()
-            return
-
         if movie_info["Response"] == "True":
             title = movie_info["Title"]
             publication_year = movie_info["Year"]
             movie_rating = movie_info["imdbRating"]
             movie_cover = movie_info["Poster"]
-            storage.add_movie(title, publication_year, movie_rating, movie_cover)
-            print(f"{title} successfully added to the database")
+            storage.add_movie(title, publication_year, movie_rating, movie_cover, user_id)
+            print(f"Movie {title} added to {user_name}'s collection!")
         else:
             print(movie_info["Error"])
-    else: print("\nThe Movie is already in the database")
+    else: print(f"\n{user_name}, the Movie is already in your database")
 
     quit_function()
 
 
-def delete_movie():
+def delete_movie(user_id):
     """Function for delete a movie"""
 
-    all_movies = storage.list_movies()
+    if len(storage.list_movies(user_id)) == 0:
+        print("No movies to delete.")
+        quit_function()
+        return
+
+    all_movies = storage.list_movies(user_id)
     userinput_movie_title = input("\nWhich Movie do you want to delete?: ").lower().strip()
 
     movie_founder = False
@@ -125,16 +132,20 @@ def delete_movie():
 
     if movie_founder:
         storage.delete_movie(movie_key_founder)
-        print("\nThe Movie is now deleted")
     else:
         print("\nMovie not found")
 
     quit_function()
 
-def update_movie():
+def update_movie(user_id):
     """Function for update rating of a movie"""
 
-    all_movies = storage.list_movies()
+    if len(storage.list_movies(user_id)) == 0:
+        print("No movies to update.")
+        quit_function()
+        return
+
+    all_movies = storage.list_movies(user_id)
     userinput_movie_title = input("\nWhich Movie do you want to update?: ").lower().strip()
 
     movie_founder = False
@@ -162,15 +173,15 @@ def update_movie():
 
     quit_function()
 
-def stats():
+def stats(user_id):
     """Function of stats average rating, median, hightest and worst movie by rating"""
 
-    if len(storage.list_movies()) == 0:
+    if len(storage.list_movies(user_id)) == 0:
         print("Statistics cannot be displayed as there are no movies in the database.")
         quit_function()
         return
 
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
     list_of_rating = []
     for movie in all_movies:
         list_of_rating.append(all_movies[movie]["rating"])
@@ -197,31 +208,31 @@ def stats():
 
     quit_function()
 
-def random_movie():
+def random_movie(user_id):
     """Function for random movie"""
 
-    if len(storage.list_movies()) == 0:
+    if len(storage.list_movies(user_id)) == 0:
         print("No movies can be recommended to you as there are no movies in the database.")
         quit_function()
         return
 
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
     choice_movie = random.choice(list(all_movies))
     print(f"Your movie for to night, {choice_movie} rated by {all_movies[choice_movie]['rating']}")
     quit_function()
 
 
-def search_movie():
+def search_movie(user_id):
     """Function for search a movie by user input"""
 
-    if len(storage.list_movies()) == 0:
+    if len(storage.list_movies(user_id)) == 0:
         print("No movies found to search.")
         quit_function()
         return
 
     user_input_search_movie = input("Which movie are you searching for?: ").lower().strip()
     movie_founder = False
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
     for movie in all_movies:
         if user_input_search_movie in movie.lower():
             print(f"{movie} : {all_movies[movie]['rating']}")
@@ -231,15 +242,15 @@ def search_movie():
     quit_function()
 
 
-def movies_sorted_by_rating():
+def movies_sorted_by_rating(user_id):
     """Function movie sorted by rating"""
 
-    if len(storage.list_movies()) == 0:
+    if len(storage.list_movies(user_id)) == 0:
         print("No movies found to sort.")
         quit_function()
         return
 
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
     list_of_movie_tuple = []
     for movie in all_movies:
         list_of_movie_tuple.append((all_movies[movie]["rating"], movie))
@@ -351,9 +362,9 @@ def movies_sorted_by_rating():
 #
 #     quit_function()
 
-def generate_website():
+def generate_website(user_id):
     """Generate a movie Website for the User"""
-    all_movies = storage.list_movies()
+    all_movies = storage.list_movies(user_id)
 
     all_movies_info = ""
     for title, info in all_movies.items():
@@ -374,22 +385,28 @@ def generate_website():
     print("Website was generated successfully.")
     quit_function()
 
-def main():
+def user_change():
+    user_log.main()
 
-    dict_of_functions = {0: end_of_program,
-                         1: list_movies,
-                         2: add_movie,
-                         3: delete_movie,
-                         4: update_movie,
-                         5: stats,
-                         6: random_movie,
-                         7: search_movie,
-                         8: movies_sorted_by_rating,
-                         9: generate_website
+def main(userinput_from_user_log):
+    user_id = userinput_from_user_log["user_id"]
+    user_name = userinput_from_user_log["name"]
+
+    dict_of_functions = {0: partial(end_of_program, user_name),
+                         1: partial(list_movies, user_id, user_name),
+                         2: partial(add_movie, user_id, user_name),
+                         3: partial(delete_movie, user_id),
+                         4: partial(update_movie, user_id),
+                         5: partial(stats, user_id),
+                         6: partial(random_movie, user_id),
+                         7: partial(search_movie, user_id),
+                         8: partial(movies_sorted_by_rating, user_id),
+                         9: partial(generate_website, user_id),
+                         10: user_change
                          }                                  # 9: movies_sorted_by_year, 10: filter_movies
 
     while True:
-        print_menu()
+        print_menu(user_name)
         user_input_command = get_menu_choice()
         dict_of_functions[user_input_command]()
 
