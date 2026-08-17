@@ -102,7 +102,8 @@ def add_movie(user_id, user_name):
             publication_year = movie_info["Year"]
             movie_rating = movie_info["imdbRating"]
             movie_cover = movie_info["Poster"]
-            storage.add_movie(title, publication_year, movie_rating, movie_cover, user_id)
+            imdb_id = movie_info["imdbID"]
+            storage.add_movie(title, publication_year, movie_rating, movie_cover, user_id, imdb_id)
             print(f"Movie {title} added to {user_name}'s collection!")
         else:
             print(movie_info["Error"])
@@ -375,9 +376,11 @@ def generate_website(user_id, user_name):
         movie_info = ""
         movie_info += "<li>\n"
         movie_info += '<div class="movie">\n'
+        movie_info += f'<a href="https://www.imdb.com/title/{info["imdb_id"]}/" target="_blank">\n'
         movie_info += f'<img class="movie-poster" src="{info["cover_url"]}" title=""/>\n'
-        movie_info += f'<div class ="movie-tooltip">{info["rating"]}</div\n>'
-        movie_info += f'<div class="movie-title">Rating: {title}</div>\n'
+        movie_info += '</a>'
+        movie_info += f'<div class ="movie-tooltip">Rating: {info["rating"]}</div\n>'
+        movie_info += f'<div class="movie-title">{title}</div>\n'
         movie_info += f'<div class="movie-year">{info["year"]}</div>\n'
         movie_info += '</div>\n'
         movie_info += '</li>'
