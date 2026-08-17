@@ -376,7 +376,8 @@ def generate_website(user_id, user_name):
         movie_info += "<li>\n"
         movie_info += '<div class="movie">\n'
         movie_info += f'<img class="movie-poster" src="{info["cover_url"]}" title=""/>\n'
-        movie_info += f'<div class="movie-title">{title}</div>\n'
+        movie_info += f'<div class ="movie-tooltip">{info["rating"]}</div\n>'
+        movie_info += f'<div class="movie-title">Rating: {title}</div>\n'
         movie_info += f'<div class="movie-year">{info["year"]}</div>\n'
         movie_info += '</div>\n'
         movie_info += '</li>'
