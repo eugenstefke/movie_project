@@ -25,7 +25,8 @@ def add_user(name):
     """Add a new user to the database."""
     with engine.connect() as connection:
         try:
-            connection.execute(text("INSERT INTO users (name) VALUES (:name)"),{"name": name})
+            connection.execute(text("INSERT INTO users (name) VALUES (:name)"),
+                               {"name": name})
             connection.commit()
         except Exception as e:
             print(f"Error: {e}")

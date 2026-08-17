@@ -36,24 +36,24 @@ def add_movie(title, year, rating, cover_url, user_id):
         except Exception as e:
             print(f"Error: {e}")
 
-def delete_movie(title):
+def delete_movie(title, user_id):
     """Delete a movie from the database."""
     with engine.connect() as connection:
         try:
-            connection.execute(text("DELETE FROM movies WHERE title = :title"),
-                               {"title": title})
+            connection.execute(text("DELETE FROM movies WHERE title = :title AND user_id = :user_id"),
+                               {"title": title, "user_id": user_id})
             connection.commit()
             print(f"Movie '{title}' deleted successfully.")
         except Exception as e:
             print(f"Error: {e}")
 
 
-def update_movie(title, rating):
+def update_movie(title, rating, user_id):
     """Update a movie's rating in the database."""
     with engine.connect() as connection:
         try:
-            connection.execute(text("UPDATE movies SET rating = :rating WHERE title = :title"),
-                               {"title": title, "rating": rating})
+            connection.execute(text("UPDATE movies SET rating = :rating WHERE title = :title AND user_id = :user_id"),
+                               {"title": title, "rating": rating, "user_id": user_id})
             connection.commit()
             print(f"Movie '{title}' successfully updated.")
         except Exception as e:

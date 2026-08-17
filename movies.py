@@ -13,7 +13,6 @@ MIN_RATING = 1.0
 LOW_COMMAND_NUMBER = 0
 HIGH_COMMAND_NUMBER = 10
 
-
 # def get_sort_year(year):
 #     """Any movies are a series and have a period as publication year example: 2010–2020
 #     and that’s what it is – not just a normal hyphen –
@@ -79,7 +78,7 @@ def list_movies(user_id, user_name):
         for movie in all_movies:
             print(f"Title: {movie} Rating: {all_movies[movie]['rating']}, Year of publication: {all_movies[movie]['year']}")
     else:
-        print(f"{user_name}, your movie collection is empty. Add some movies!")
+        print(f"{user_name}, your film library is empty. Please add a movie")
 
     quit_function()
 
@@ -131,7 +130,7 @@ def delete_movie(user_id):
             movie_key_founder = movie
 
     if movie_founder:
-        storage.delete_movie(movie_key_founder)
+        storage.delete_movie(movie_key_founder, user_id)
     else:
         print("\nMovie not found")
 
@@ -160,8 +159,7 @@ def update_movie(user_id):
             try:
                 userinput_movie_rating = float(input("Enter the new rating: "))
                 if userinput_movie_rating <= MAX_RATING and userinput_movie_rating >= MIN_RATING:
-                    storage.update_movie(movie_key_founder, userinput_movie_rating)
-                    print('Movie is now updated')
+                    storage.update_movie(movie_key_founder, userinput_movie_rating, user_id)
                     break
                 else:
                     print('Select a rating between 1.0 and 10.0')
@@ -177,7 +175,7 @@ def stats(user_id):
     """Function of stats average rating, median, hightest and worst movie by rating"""
 
     if len(storage.list_movies(user_id)) == 0:
-        print("Statistics cannot be displayed as there are no movies in the database.")
+        print("Statistics cannot be displayed as there are no movies in your movie library.")
         quit_function()
         return
 
@@ -212,7 +210,7 @@ def random_movie(user_id):
     """Function for random movie"""
 
     if len(storage.list_movies(user_id)) == 0:
-        print("No movies can be recommended to you as there are no movies in the database.")
+        print("No movies can be recommended to you as there are no movies in your movie library.")
         quit_function()
         return
 
@@ -362,8 +360,14 @@ def movies_sorted_by_rating(user_id):
 #
 #     quit_function()
 
-def generate_website(user_id):
+def generate_website(user_id, user_name):
     """Generate a movie Website for the User"""
+
+    if len(storage.list_movies(user_id)) == 0:
+        print(f"{user_name}, your film library is empty. Please add a movie")
+        quit_function()
+        return
+
     all_movies = storage.list_movies(user_id)
 
     all_movies_info = ""
@@ -386,6 +390,7 @@ def generate_website(user_id):
     quit_function()
 
 def user_change():
+    """Function only for User change"""
     user_log.main()
 
 def main(userinput_from_user_log):
@@ -401,7 +406,7 @@ def main(userinput_from_user_log):
                          6: partial(random_movie, user_id),
                          7: partial(search_movie, user_id),
                          8: partial(movies_sorted_by_rating, user_id),
-                         9: partial(generate_website, user_id),
+                         9: partial(generate_website, user_id, user_name),
                          10: user_change
                          }                                  # 9: movies_sorted_by_year, 10: filter_movies
 
