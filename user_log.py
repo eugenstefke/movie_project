@@ -1,4 +1,4 @@
-import user_storage_sql as storage
+from movie_project.movie_project.storage import user_storage_sql as storage
 import movies
 
 LOW_COMMAND_NUMBER = 1

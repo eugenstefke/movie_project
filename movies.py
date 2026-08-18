@@ -1,5 +1,5 @@
 import random
-import movie_storage_sql as storage
+from movie_project.movie_project.storage import movie_storage_sql as storage
 from data_collector import retrieve_data
 import text_generator as generator
 from functools import partial
