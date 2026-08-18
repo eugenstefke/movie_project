@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy import event
 
 # Define the database URL
-DB_URL = "sqlite:///app.db"
+DB_URL = "sqlite:///data/app.db"
 
 # Create the engine
 engine = create_engine(DB_URL, echo=False) # echo=True for debbuging print all SQL Commands
