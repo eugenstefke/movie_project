@@ -38,14 +38,16 @@ Einrichtung
 ### 2. Repository klonen
 
 ```bash
-git clone https://github.com/eugenstefke/<dein-repository>.git
+git clone git@github.com:eugenstefke/movie_project.git
 cd <dein-repository>
 ```
 
 ### 3. Abhängigkeiten installieren
 
 ```bash
-pip install sqlalchemy requests python-dotenv
+pip install sqlalchemy
+pip install requests
+pip install python-dotenv
 ```
 
 ### 4. API-Key hinterlegen
@@ -65,7 +67,7 @@ Beim ersten Start werden die Tabellen `users` und `movies` automatisch angelegt 
 ### Anwendung starten
 
 ```bash
-python user_log.py
+python run.py
 ```
 
 ### Ablauf
@@ -104,6 +106,9 @@ python user_log.py
 ├── style.css               # Styling der generierten Website
 └── app.db                  # SQLite-Datenbank (wird automatisch erstellt)
 
+### Hinweis
+
+In movies.py sind 2 Funktionen (movies_sorted_by_year und filter_movies) auskommentiert, diese sind kein Projektstand mehr und dienen nur als Historie zur vorherigen Version des Projektes.
 
 English Version 
 
@@ -145,14 +150,16 @@ The Movie App is a Python application that allows multiple users to each manage 
 ### 2. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/<your-repository>.git
+git clone git@github.com:eugenstefke/movie_project.git
 cd <your-repository>
 ```
 
 ### 3. Install dependencies
 
 ```bash
-pip install sqlalchemy requests python-dotenv
+pip install sqlalchemy
+pip install requests
+pip install python-dotenv
 ```
 
 ### 4. Set up the API key
@@ -172,7 +179,7 @@ On first run, the `users` and `movies` tables are created automatically (in `app
 ### Starting the application
 
 ```bash
-python user_log.py
+python run.py
 ```
 
 ### Workflow
@@ -212,3 +219,6 @@ python user_log.py
 └── app.db                  # SQLite database (created automatically)
 ```
 ```
+
+### Note
+In movies.py, 2 functions (movies_sorted_by_year and filter_movies) are commented out; they are no longer part of the current project state and are kept only as a historical reference to a previous version of the project.
