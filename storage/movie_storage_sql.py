@@ -9,7 +9,7 @@ engine = create_engine(DB_URL, echo=False) # echo=True for debbuging print all S
 @event.listens_for(engine, "connect")
 def enable_foreign_keys(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA foreign_keys=ON") # for activate the foreignkey in SQLite. This is switched off by default
     cursor.close()
 
 # Create the movies table if it does not exist

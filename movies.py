@@ -99,14 +99,17 @@ def add_movie(user_id, user_name):
 
         if movie_info["Response"] == "True":
             title = movie_info["Title"]
-            publication_year = movie_info["Year"]
-            movie_rating = movie_info["imdbRating"]
+            publication_year = int(movie_info["Year"])
+            movie_rating = float(movie_info["imdbRating"])
             movie_cover = movie_info["Poster"]
             imdb_id = movie_info["imdbID"]
             storage.add_movie(title, publication_year, movie_rating, movie_cover, user_id, imdb_id)
             print(f"Movie {title} added to {user_name}'s collection!")
         else:
             print(movie_info["Error"])
+            quit_function()
+            return
+
     else: print(f"\n{user_name}, the Movie is already in your database")
 
     quit_function()
@@ -369,6 +372,7 @@ def generate_website(user_id, user_name):
         quit_function()
         return
 
+    website_title = input("What title would you like to have on your website?: ")
     all_movies = storage.list_movies(user_id)
 
     all_movies_info = ""
@@ -387,7 +391,7 @@ def generate_website(user_id, user_name):
         movie_info += '\n'
         all_movies_info += movie_info
 
-    new_html_code = generator.replace_text(generator.read_html_data(), all_movies_info)
+    new_html_code = generator.replace_text(generator.read_html_data(), all_movies_info, website_title)
     generator.write_a_html_code(new_html_code)
 
     print("Website was generated successfully.")

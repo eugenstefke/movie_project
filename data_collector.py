@@ -21,6 +21,8 @@ def retrieve_data(title):
             return movie_infos
         else:
             print(f"Data Error: Status {get_requ.status_code}")
-            return []
-    except Exception:
+            return {"Response": False}
+    except Exception as e:
         print("Error, no connection to the internet")
+        return {"Response": False,
+                "Error": ""}
